@@ -186,7 +186,11 @@ local function drawColorSelection()
 end
 
 function love.draw()
-    love.graphics.clear(0.85, 0.7, 0.45)
+    love.graphics.clear(1, 1, 1)
+    love.graphics.setColor(0.85, 0.7, 0.45)
+    local boardRight = pente.margin + pente.cellSize * (pente.boardSize - 1)
+    local boardBottom = pente.margin + pente.cellSize * (pente.boardSize - 1)
+    love.graphics.rectangle("fill", pente.margin, pente.margin, boardRight - pente.margin, boardBottom - pente.margin)
     love.graphics.setColor(0, 0, 0)
     drawBoard()
 
