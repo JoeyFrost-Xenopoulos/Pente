@@ -8,6 +8,43 @@ local blackCaptures = 0
 local whiteCaptures = 0
 local gameOver = false
 local winner = nil
+local history = {}
+local historyIndex = 0
+
+local function takeSnapshot(mx, my, mp)
+    local stonesCopy = {}
+    for y = 1, boardSize do
+        stonesCopy[y] = {}
+        for x = 1, boardSize do
+            stonesCopy[y][x] = stones[y][x]
+        end
+    end
+    
+    return {
+        stones = stonesCopy,
+        currentPlayer = currentPlayer,
+        blackCaptures = blackCaptures,
+        whiteCaptures = whiteCaptures,
+        gameOver = gameOver,
+        winner = winner,
+        moveX = mx,
+        moveY = my,
+        movePlayer = mp
+    }
+end
+
+local function restoreSnapshot(snap)
+    for y = 1, boardSize do
+        for x = 1, boardSize do
+            stones[y][x] = snap.stones[y][x]
+        end
+    end
+    currentPlayer = snap.currentPlayer
+    blackCaptures = snap.blackCaptures
+    whiteCaptures = snap.whiteCaptures
+    gameOver = snap.gameOver
+    winner = snap.winner
+end
 
 local directions = {
     {1,0}, {0,1}, {1,1}, {1,-1},
@@ -100,6 +137,35 @@ local function init()
     whiteCaptures = 0
     gameOver = false
     winner = nil
+    
+    history = {}
+    historyIndex = 0
+    table.insert(history, takeSnapshot(nil, nil, nil))
+    historyIndex = 1
+end
+
+local function pushHistory(x, y, player)
+    if historyIndex < #history then
+        for i = historyIndex + 1, #history do
+            history[i] = nil
+        end
+    end
+    table.insert(history, takeSnapshot(x, y, player))
+    historyIndex = #history
+end
+
+local function goBack()
+    if historyIndex > 1 then
+        historyIndex = historyIndex - 1
+        restoreSnapshot(history[historyIndex])
+    end
+end
+
+local function goForward()
+    if historyIndex < #history then
+        historyIndex = historyIndex + 1
+        restoreSnapshot(history[historyIndex])
+    end
 end
 
 return {
@@ -114,5 +180,12 @@ return {
     winner = function() return winner end,
     boardSize = boardSize,
     cellSize = cellSize,
-    margin = margin
+    margin = margin,
+    canGoBack = function() return historyIndex > 1 end,
+    canGoForward = function() return historyIndex < #history end,
+    goBack = goBack,
+    goForward = goForward,
+    isAtCurrentPosition = function() return historyIndex == #history end,
+    pushHistory = pushHistory,
+    getHistory = function() return history, historyIndex end
 }
