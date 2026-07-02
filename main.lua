@@ -104,10 +104,7 @@ local function drawHistory()
             end
         end
         
-        local lineText = moveNum .. ". " .. blackMove
-        if whiteMove ~= "" then
-            lineText = lineText .. "    " .. whiteMove
-        end
+        local lineText = string.format("%d. %-6s    %s", moveNum, blackMove, whiteMove)
         
         local isCurrent = (lineEndIdx == hIdx)
         
@@ -234,8 +231,8 @@ function love.draw()
     
     if pente.gameOver() then
         local text = pente.winner() == 1 and "Black Wins!" or "White Wins!"
-        love.graphics.printf(text, 0, 20, love.graphics.getWidth(), "center")
-        love.graphics.printf("Press R to play again", 0, 50, love.graphics.getWidth(), "center")
+        love.graphics.printf(text, -100, 20, love.graphics.getWidth(), "center")
+        love.graphics.printf("Press R to play again", 305, 50, love.graphics.getWidth(), "center")
     end
 end
 
